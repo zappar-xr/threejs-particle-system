@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>World Space Particle Trail Demo</title>
+  </head>
+  <body>
+    <div id="info">
+      <h3>World Space Particle Demo</h3>
+
+      <div class="controls">
+        <button id="toggleSpace">Toggle Space Mode</button>
+        <span id="spaceMode">World Space: ON</span>
+      </div>
+
+      <div class="controls">
+        <label for="particleType">Particle Type:</label>
+        <select id="particleType">
+          <option value="smoke">Smoke</option>
+          <option value="fire">Fire</option>
+          <option value="sparks">Sparks</option>
+          <option value="snow">Snow</option>
+        </select>
+      </div>
+
+      <div class="controls">
+        <label for="transformMode">Transform Mode:</label>
+        <select id="transformMode">
+          <option value="translate">Move</option>
+          <option value="rotate">Rotate</option>
+          <option value="scale">Scale</option>
+        </select>
+      </div>
+    </div>
+    <script type="module" src="./index.ts"></script>
+  </body>
+</html>

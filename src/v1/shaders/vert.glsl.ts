@@ -120,7 +120,7 @@ export const vertexShader = /* glsl */ `
 		float particleRotationRadians = rotation[2] == 0.0 ? rotation[1] * positionInTime : rotation[1];
 
 		#ifdef DIRECTIONAL_BILLBOARD
-			//https://gamedev.stackexchange.com/questions/153326/how-to-rotate-directional-billboard-particle-sprites-toward-the-direction-the-pa			vec3 quad_center_in_time = center;
+			//https://gamedev.stackexchange.com/questions/153326/how-to-rotate-directional-billboard-particle-sprites-toward-the-direction-the-pa
 			vec3 quad_center_in_time = center;
 			quad_center_in_time += force;
 
@@ -137,7 +137,12 @@ export const vertexShader = /* glsl */ `
 
 			float maxScale = scaleX; // max(max(scaleX, scaleY), scaleZ);
 
-			vec4 wPos = modelMatrix * vec4(pos, 1.0);
+			vec4 wPos;
+			#ifdef WORLD_SPACE_ENABLED
+				wPos = vec4(worldSpawnPosition + pos, 1.0);
+			#else
+				wPos = modelMatrix * vec4(pos, 1.0);
+			#endif
 			vec3 wCameraPos = cameraPosition;
 			vec3 wCameraPlaneNormal = normalize(wCameraPos - quad_center_in_time);
 			vec4 _forceDirInTime = vec4(force - prev_force, 1.0) * inverse(modelMatrix);
@@ -179,8 +184,17 @@ export const vertexShader = /* glsl */ `
 			// https://github.com/sketchpunk/FunWithWebGL2/blob/5d4148de1714376b0b4a47e8b59826362c256f68/progress/fungi/shaders/TransformFB_P2.txt
 			// http://www.songho.ca/opengl/files/gl_anglestoaxes01.png
 
+			mat4 mvMat;
+			vec4 worldPos;
+			#ifdef WORLD_SPACE_ENABLED
+				worldPos = vec4(worldSpawnPosition + pos, 1.0);
+				mvMat = viewMatrix;
+			#else
+				worldPos = modelMatrix * vec4(pos, 1.0);
+				mvMat = modelViewMatrix;
+			#endif
 			// https://gamedev.stackexchange.com/questions/119702/fastest-way-to-neutralize-scale-in-the-transform-matrix
-			mat4 mvMatWithoutScale = mat4(normalize(modelViewMatrix[0]), normalize(modelViewMatrix[1]), normalize(modelViewMatrix[2]), modelViewMatrix[3]);
+			mat4 mvMatWithoutScale = mat4(normalize(mvMat[0]), normalize(mvMat[1]), normalize(mvMat[2]), mvMat[3]);
 
 			vec3 right = vec3(mvMatWithoutScale[0][0], mvMatWithoutScale[1][0], mvMatWithoutScale[2][0]);
 			vec4 up = vec4(0.0, 1.0, 0.0, 1.0); // Cylindrical
@@ -194,17 +208,30 @@ export const vertexShader = /* glsl */ `
 			//vec3 p = position * particleSize;
 			vec3 vert_billboard_pos = pos + (right.xyz * p.x) + (up.xyz * p.y); //Rotate vertex toward camera
 
-			gl_Position = projectionMatrix * modelViewMatrix * vec4(vert_billboard_pos, 1.0);
+			#ifdef WORLD_SPACE_ENABLED
+				vec4 worldVertPos = vec4(worldSpawnPosition + vert_billboard_pos, 1.0);
+				gl_Position = projectionMatrix * viewMatrix * worldVertPos;
+			#else
+				gl_Position = projectionMatrix * modelViewMatrix * vec4(vert_billboard_pos, 1.0);
+			#endif
 		#endif
 
 
 		#ifdef SPHERICAL_BILLBOARD
 		    //Convert pos to a world-space value
-			float scaleX = length(vec3(modelMatrix[0][0], modelMatrix[0][1], modelMatrix[0][2]));
+			vec4 mvPosition;
+			float scaleX;
+			#ifdef WORLD_SPACE_ENABLED
+				// For world space, use unit scale and world spawn position
+				scaleX = 1.0;
+				mvPosition = viewMatrix * vec4(worldSpawnPosition + pos, 1.0);
+			#else
+				scaleX = length(vec3(modelMatrix[0][0], modelMatrix[0][1], modelMatrix[0][2]));
+				mvPosition = modelViewMatrix * vec4( pos, 1.0 );
+			#endif
 
-            mat3 rotationMatrix = mat3(getRotationMatrix4(vec3(0, 0, 1), particleRotationRadians));  
+            mat3 rotationMatrix = mat3(getRotationMatrix4(vec3(0, 0, 1), particleRotationRadians));
 
-			vec4 mvPosition = modelViewMatrix * vec4( pos, 1.0 );
 			mvPosition.xy += (rotationMatrix * position).xy * particleSize * scaleX;
 
 			gl_Position = projectionMatrix * mvPosition;
@@ -236,7 +263,12 @@ export const vertexShader = /* glsl */ `
 
 				vec4 vertexPosition = vec4(pos + (rotationMatrix3 * position) * particleSize, 1.0);
 			#endif
-			gl_Position = projectionMatrix * modelViewMatrix * vertexPosition;
+			#ifdef WORLD_SPACE_ENABLED
+				vec4 worldVertexPosition = vec4(worldSpawnPosition + vertexPosition.xyz, 1.0);
+				gl_Position = projectionMatrix * viewMatrix * worldVertexPosition;
+			#else
+				gl_Position = projectionMatrix * modelViewMatrix * vertexPosition;
+			#endif
 		#endif
 
 

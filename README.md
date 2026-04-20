@@ -17,6 +17,7 @@ This is a powerful JavaScript library for creating and managing particle emitter
 - **Size and Angle**: Adjust the size and angle of particles, both also support value-over-lifetime properties.
 - **Texture and Blending**: Define the texture of particles.<!-- even supporting sprite-sheets for animated particles. --> Apply blending modes to enhance the visual appearance of your particles.
 - **Billboarding**: Choose between spherical, cylindrical or directional billboarding for your different emitter effects.
+- **World Space Particles**: Enable particles to maintain their world position when the emitter moves, creating natural trailing effects for moving objects.
 
 
 You may also be interested in:
@@ -81,7 +82,8 @@ const setupEmitterGroup = (billboard?: 'spherical' | 'cylindrical' | 'directiona
   const _emitterGroup = new ParticleSystem.EmitterGroup({
     billboard,
     maxParticleCount: 2000,
-    texture: {value: new THREE.TextureLoader().load(rainParticle)}
+    texture: {value: new THREE.TextureLoader().load(rainParticle)},
+    worldSpace: true // Enable world space for trailing effects
   });
 
   // Define a new Emitter
@@ -217,6 +219,7 @@ renderer.setAnimationLoop(animation);
 | fog | boolean | true | Whether this group's particles should be affected by their scene's fog. |
 | scale | number | 300 | The scale factor to apply to this group's particle sizes. Useful for setting particle sizes to be relative to renderer size. |
 | maxParticleCount | number _or_ null | null | WARNING: If no `maxParticleCount` specified adding emitters after rendering will probably cause errors. |
+| **worldSpace** | boolean | false | When enabled, particles maintain their world position when the emitter moves, creating natural trailing effects. Useful for moving objects like vehicles, projectiles, or animated characters. |
 
 ## Links and Resources
 

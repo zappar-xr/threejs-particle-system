@@ -1,9 +1,9 @@
 import {Blending, Color, Texture, Vector2, Vector3, Vector4, Side} from 'three';
 import ShaderAttribute from '../../shared/helpers/ShaderAttribute';
 
-export type IShaderAttributeKeys = 'position' | 'acceleration' | 'velocity' | 'orbit' | 'orbitCenter' | 'params' | 'size' | 'angle' | 'color' | 'opacity' | 'rotation';
+export type IShaderAttributeKeys = 'position' | 'acceleration' | 'velocity' | 'orbit' | 'orbitCenter' | 'params' | 'size' | 'angle' | 'color' | 'opacity' | 'rotation' | 'worldSpawnPosition';
 
-export type IShaderAttributeKeyArray = ['position', 'acceleration', 'velocity', 'orbit', 'orbitCenter', 'params', 'size', 'angle', 'color', 'opacity', 'rotation'];
+export type IShaderAttributeKeyArray = ['position', 'acceleration', 'velocity', 'orbit', 'orbitCenter', 'params', 'size', 'angle', 'color', 'opacity', 'rotation', 'worldSpawnPosition'];
 
 export type IShaderAttributes = Record<IShaderAttributeKeys, ShaderAttribute>;
 
@@ -20,7 +20,8 @@ export type IDefinesBooleanPropKeys =
   | 'NO_BILLBOARD'
   | 'RANDOM_PARTICLE_ROTATION'
   | 'HAS_TEXTURE'
-  | 'USE_PARTICLE_ALPHA_TEST';
+  | 'USE_PARTICLE_ALPHA_TEST'
+  | 'WORLD_SPACE_ENABLED';
 
 export interface IUniforms {
   tex: {type: 't'; value: Texture | null};
@@ -34,6 +35,7 @@ export interface IUniforms {
   scale: {type: 'f'; value: number};
   customAlphaTest: {type: 'f'; value: number};
   randomParticleRotationAngle: {type: 'f'; value: number};
+  worldSpaceEnabled: {type: 'f'; value: number};
 }
 
 export enum IDistribution {
@@ -158,6 +160,7 @@ export interface IGroupOptions {
   randomParticleRotationAngle?: number;
   rotation?: number;
   billboard?: 'spherical' | 'directional' | 'cylindrical';
+  worldSpace?: boolean;
 }
 
 export type IEmitterIntersectionState = IEmitterPositionState &

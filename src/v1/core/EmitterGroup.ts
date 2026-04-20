@@ -71,6 +71,7 @@ export const valueOverLifetimeLength = 4;
 export class EmitterGroup {
   public uuid: string;
   public fixedTimeStep: number;
+  public worldSpace: boolean;
   private _texture: Texture | null;
 
   public set texture(texture: Texture | null) {
@@ -274,6 +275,8 @@ export class EmitterGroup {
 
     this.fixedTimeStep = options.fixedTimeStep ?? 0.016;
 
+    this.worldSpace = options.worldSpace ?? false;
+
     this.randomParticleRotationAngle = options.randomParticleRotationAngle ?? 0;
 
     // Set properties used in the uniforms map, starting with the
@@ -369,6 +372,10 @@ export class EmitterGroup {
         type: 'f',
         value: this.randomParticleRotationAngle,
       },
+      worldSpaceEnabled: {
+        type: 'f',
+        value: this.worldSpace ? 1.0 : 0.0,
+      },
     };
 
     // Add some defines into the mix...
@@ -387,6 +394,7 @@ export class EmitterGroup {
       RANDOM_PARTICLE_ROTATION: this.randomParticleRotationAngle !== 0,
       HAS_TEXTURE: !!this.texture,
       USE_PARTICLE_ALPHA_TEST: this._alphaTest > 0,
+      WORLD_SPACE_ENABLED: this.worldSpace,
     };
 
     // Map of all attributes to be applied to the particles.
@@ -404,6 +412,7 @@ export class EmitterGroup {
       color: new ShaderAttribute(4),
       opacity: new ShaderAttribute(4),
       rotation: new ShaderAttribute(3),
+      worldSpawnPosition: new ShaderAttribute(3),
     };
 
     this.attributeKeys = Object.keys(this.attributes) as IShaderAttributeKeyArray;
@@ -593,6 +602,7 @@ export class EmitterGroup {
       emitter.assignRotationValue(i);
       emitter.assignParamsValue(i);
       emitter.assignColorValue(i);
+      if (this.worldSpace) emitter.assignWorldSpawnPosition(i);
     }
 
     // Update the geometry and make sure the attributes are referencing

@@ -218,9 +218,9 @@ export class Emitter {
   public group: InstanceType<typeof EmitterGroup> | null;
   public attributes: IShaderAttributes | null;
   public paramsArray: Float32Array | Uint8Array | null;
-  public resetFlags: Partial<Record<IUpdateMap[keyof IUpdateMap] | 'orbitCenter', boolean>>;
-  public updateFlags: Partial<Record<IUpdateMap[keyof IUpdateMap] | 'orbitCenter', boolean>>;
-  public updateCounts: Partial<Record<IUpdateMap[keyof IUpdateMap] | 'orbitCenter', number>>;
+  public resetFlags: Partial<Record<IUpdateMap[keyof IUpdateMap] | 'orbitCenter' | 'worldSpawnPosition', boolean>>;
+  public updateFlags: Partial<Record<IUpdateMap[keyof IUpdateMap] | 'orbitCenter' | 'worldSpawnPosition', boolean>>;
+  public updateCounts: Partial<Record<IUpdateMap[keyof IUpdateMap] | 'orbitCenter' | 'worldSpawnPosition', number>>;
   public updateMap: IUpdateMap;
   public bufferUpdateRanges: Partial<Record<IShaderAttributeKeys, {min: number; max: number}>>;
   public attributeKeys: IShaderAttributeKeyArray | null;
@@ -689,6 +689,19 @@ export class Emitter {
     utils.randomColorAsHex(this.attributes!.color, index, colorValue, colorSpread);
   };
 
+  public assignWorldSpawnPosition = (index: number) => {
+    if (this.group && this.group.mesh && this.group.worldSpace) {
+      const worldPosition = this.group.mesh.getWorldPosition(new Vector3());
+      const attr = this.attributes!.worldSpawnPosition;
+      const array = attr.typedArray!.array;
+      const baseIndex = index * 3;
+
+      array[baseIndex] = worldPosition.x;
+      array[baseIndex + 1] = worldPosition.y;
+      array[baseIndex + 2] = worldPosition.z;
+    }
+  };
+
   private _resetParticle = (index: number) => {
     const resetFlags = this.resetFlags;
     const updateFlags = this.updateFlags;
@@ -712,6 +725,11 @@ export class Emitter {
           ++updateCounts[key as IParticleBasePropKeys]!;
         }
       }
+    }
+
+    if (this.group && this.group.worldSpace) {
+      this.assignWorldSpawnPosition(index);
+      this._updateAttributeUpdateRange('worldSpawnPosition', index);
     }
   };
 

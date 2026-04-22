@@ -40,6 +40,6 @@
     "@types/node": "20.12.7"
   },
   "peerDependencies": {
-    "three": "0.142.0 - 0.181.0"
+    "three": "0.142.0 - 0.184.0"
   }
 }
